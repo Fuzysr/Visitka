@@ -188,11 +188,35 @@ function App() {
   const [toastMsg, setToastMsg] = useState(null)
   const [safariPrompt, setSafariPrompt] = useState(false)
 
-  const handleSaveContact = useCallback(() => {
+  const handleSaveContact = useCallback(async () => {
     if (isInAppBrowser()) {
       setSafariPrompt(true)
-    } else {
+      return
+    }
+
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
+
+    if (isIOS) {
+      // iOS Safari handles .vcf via direct navigation → opens Contacts
       window.location.href = VCARD_URL
+    } else {
+      // Android & Desktop: fetch the file, create a Blob with correct MIME, trigger download
+      try {
+        const res = await fetch(VCARD_URL)
+        const text = await res.text()
+        const blob = new Blob([text], { type: 'text/vcard' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'Karaliou_Raman.vcf'
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      } catch {
+        // Fallback: direct navigation
+        window.location.href = VCARD_URL
+      }
     }
   }, [])
 
