@@ -1,0 +1,142 @@
+/* ── Glow hover effects for social buttons ── */
+.btn-glow-green {
+  position: relative;
+  overflow: hidden;
+}
+.btn-glow-green::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: radial-gradient(circle at 50% 50%, rgba(37,211,102,0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+.btn-glow-green:hover::before {
+  opacity: 1;
+}
+
+.btn-glow-wechat {
+  position: relative;
+  overflow: hidden;
+}
+.btn-glow-wechat::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: radial-gradient(circle at 50% 50%, rgba(7,193,96,0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+.btn-glow-wechat:hover::before {
+  opacity: 1;
+}
+
+.btn-glow-telegram {
+  position: relative;
+  overflow: hidden;
+}
+.btn-glow-telegram::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: radial-gradient(circle at 50% 50%, rgba(0,136,204,0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+.btn-glow-telegram:hover::before {
+  opacity: 1;
+}
+
+.btn-glow-dark {
+  position: relative;
+  overflow: hidden;
+}
+.btn-glow-dark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: radial-gradient(circle at 50% 50%, rgba(184,134,11,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+.btn-glow-dark:hover::before {
+  opacity: 1;
+}
+
+/* ── Shimmer sweep effect on hover ── */
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: none;
+  pointer-events: none;
+}
+.btn-shimmer:hover::after {
+  animation: shimmer-sweep 0.6s ease forwards;
+}
+
+@keyframes shimmer-sweep {
+  0% { left: -60%; }
+  100% { left: 120%; }
+}
+
+/* ── Logo ring pulse ── */
+.logo-ring {
+  position: relative;
+}
+.logo-ring::before,
+.logo-ring::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid var(--color-gold);
+  opacity: 0;
+  animation: ring-pulse 3s ease-in-out infinite;
+}
+.logo-ring::after {
+  inset: -14px;
+  animation-delay: 1s;
+}
+
+@keyframes ring-pulse {
+  0%, 100% { opacity: 0; transform: scale(0.95); }
+  50% { opacity: 0.2; transform: scale(1); }
+}
+
+/* ── Floating particles around logo ── */
+.logo-particles {
+  position: relative;
+}
+.logo-particles .particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  opacity: 0;
+  animation: particle-float 4s ease-in-out infinite;
+}
+.logo-particles .particle:nth-child(1) { top: -8px; left: 50%; animation-delay: 0s; }
+.logo-particles .particle:nth-child(2) { top: 20%; right: -8px; animation-delay: 0.8s; }
+.logo-particles .particle:nth-child(3) { bottom: -8px; left: 50%; animation-delay: 1.6s; }
+.logo-particles .particle:nth-child(4) { top: 20%; left: -8px; animation-delay: 2.4s; }
+.logo-particles .particle:nth-child(5) { top: 50%; right: -10px; animation-delay: 0.4s; }
+.logo-particles .particle:nth-child(6) { top: 50%; left: -10px; animation-delay: 2s; }
+
+@keyframes particle-float {
+  0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
+  50% { opacity: 0.5; transform: translateY(-6px) scale(1); }
+}
