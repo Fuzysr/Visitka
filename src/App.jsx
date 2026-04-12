@@ -1,9 +1,10 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Phone, Mail, MapPin, Download, Copy, MessageCircle, Send,
   Flame, Sparkles, Award, Heart, ChevronDown, Check, Globe, X, Moon, Sun
 } from 'lucide-react'
+import { QRCodeCanvas } from 'qrcode.react'
 import './App.css'
 
 /* ─────────────────────────── i18n ─────────────────────────── */
@@ -32,7 +33,7 @@ const translations = {
     whatsapp: 'WhatsApp',
     telegram: 'Telegram',
     wechat: 'WeChat',
-    wechatScan: 'Scan QR code to add me on WeChat',
+    wechatScan: 'Scan QR code to add me on WeChat or Long press to go to the profile',
     close: 'Close',
     saveContact: 'Save Contact',
     copyPhone: 'Copy Phone',
@@ -42,6 +43,8 @@ const translations = {
     emailCopied: 'Email copied',
     openInBrowser: 'Open in Safari to save contact',
     openInBrowserDesc: 'Telegram\'s browser cannot save contacts directly. Tap the ••• button at the bottom right, then choose "Open in Safari".',
+    scanToSave: 'Scan to save contact ',
+    scanToSaveDesc: 'Scan this QR code with your phone camera to save the contact or Long press to save contact',
     owner: 'Company Owner',
     footerNote: 'Crafted with passion',
     langLabel: 'EN',
@@ -70,7 +73,7 @@ const translations = {
     whatsapp: 'WhatsApp',
     telegram: 'Telegram',
     wechat: 'WeChat',
-    wechatScan: 'Отсканируйте QR-код, чтобы добавить меня в WeChat',
+    wechatScan: 'Отсканируйте QR-код, чтобы добавить меня в WeChat Или нажмите и удерживайте, чтобы перейти в профиль.',
     close: 'Закрыть',
     saveContact: 'Сохранить контакт',
     copyPhone: 'Копировать телефон',
@@ -80,6 +83,8 @@ const translations = {
     emailCopied: 'Почта скопирована',
     openInBrowser: 'Откройте в Safari для сохранения контакта',
     openInBrowserDesc: 'Браузер Telegram не может сохранять контакты напрямую. Нажмите кнопку ••• справа внизу, затем выберите «Открыть в Safari».',
+    scanToSave: 'Сканируйте для сохранения контакта ',
+    scanToSaveDesc: 'Отсканируйте этот QR-код камерой телефона, чтобы сохранить контакт Или нажмите и удерживайте, чтобы сохранить контакт.',
     owner: 'Владелец компании',
     footerNote: 'Создано с любовью',
     langLabel: 'RU',
@@ -108,7 +113,7 @@ const translations = {
     whatsapp: 'WhatsApp',
     telegram: 'Telegram',
     wechat: '微信',
-    wechatScan: '扫描二维码添加我的微信',
+    wechatScan: '扫描二维码添加我的微信 或長按進入個人資料。',
     close: '关闭',
     saveContact: '保存联系方式',
     copyPhone: '复制电话',
@@ -118,6 +123,8 @@ const translations = {
     emailCopied: '邮箱已复制',
     openInBrowser: '在 Safari 中打开以保存联系人',
     openInBrowserDesc: 'Telegram 浏览器无法直接保存联系人。请点击右下角的 ••• 按钮，然后选择「在 Safari 中打开」。',
+    scanToSave: '扫码保存联系人',
+    scanToSaveDesc: '用手机相机扫描此二维码即可保存联系人或長按進入個人資料',
     owner: '公司负责人',
     footerNote: '用心创造',
     langLabel: '中文',
@@ -138,8 +145,13 @@ const CONTACT = {
 /* ─────────────────────── vCard Download ──────────────────── */
 const VCARD_URL = '/Karaliou_Raman.vcf'
 
+function isWeChat() {
+  return /MicroMessenger/i.test(navigator.userAgent || '')
+}
+
 function isInAppBrowser() {
   const ua = navigator.userAgent || ''
+  if (isWeChat()) return true
   // Known in-app browsers
   if (/Telegram|FBAN|FBAV|Instagram|Line\//i.test(ua)) return true
   // Telegram injects this object
@@ -148,6 +160,8 @@ function isInAppBrowser() {
   if (/iPhone|iPad|iPod/.test(ua) && /AppleWebKit/.test(ua) && !/Safari\//.test(ua)) return true
   return false
 }
+
+const VCARD_STRING = `BEGIN:VCARD\nVERSION:3.0\nFN:${CONTACT.name}\nN:KARALIOU;RAMAN;;;\nORG:${CONTACT.company}\nTITLE:Company Owner\nTEL;TYPE=CELL:${CONTACT.phone}\nEMAIL:${CONTACT.email}\nADR;TYPE=WORK:;;Minsk;;Belarus;;\nEND:VCARD`
 
 /* ──────────────── Clipboard (works over HTTP) ─────────────── */
 function copyFallback(text) {
@@ -187,8 +201,13 @@ function App() {
   const [wechatOpen, setWechatOpen] = useState(false)
   const [toastMsg, setToastMsg] = useState(null)
   const [safariPrompt, setSafariPrompt] = useState(false)
+  const [vcardQrOpen, setVcardQrOpen] = useState(false)
 
   const handleSaveContact = useCallback(async () => {
+    if (isWeChat()) {
+      setVcardQrOpen(true)
+      return
+    }
     if (isInAppBrowser()) {
       setSafariPrompt(true)
       return
@@ -257,6 +276,9 @@ function App() {
 
       {/* ─── Safari Prompt Modal ─── */}
       <SafariPromptModal open={safariPrompt} onClose={() => setSafariPrompt(false)} t={t} />
+
+      {/* ─── vCard QR Modal (WeChat) ─── */}
+      <VCardQRModal open={vcardQrOpen} onClose={() => setVcardQrOpen(false)} t={t} />
 
       {/* ─── Footer ─── */}
       <Footer t={t} />
@@ -788,6 +810,100 @@ function SafariPromptModal({ open, onClose, t }) {
             <button
               onClick={onClose}
               className="mt-6 px-8 py-2.5 bg-charcoal text-cream text-sm font-medium rounded-full hover:bg-charcoal-light transition-all cursor-pointer"
+            >
+              {t.close}
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
+/* ═══════════════════ VCARD QR MODAL (WeChat) ═════════════── */
+function VCardQRModal({ open, onClose, t }) {
+  const canvasRef = useRef(null)
+  const [qrDataUrl, setQrDataUrl] = useState(null)
+
+  useEffect(() => {
+    if (!open) { setQrDataUrl(null); return }
+    // Small delay to let QRCodeCanvas render
+    const timer = setTimeout(() => {
+      const wrapper = canvasRef.current
+      if (!wrapper) return
+      const canvas = wrapper.querySelector('canvas')
+      if (canvas) setQrDataUrl(canvas.toDataURL('image/png'))
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [open])
+
+  if (!open) return null
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center px-6"
+          onClick={onClose}
+        >
+          <div className="absolute inset-0 bg-charcoal/60 backdrop-blur-sm" />
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="relative bg-card rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-mist/50 flex items-center justify-center text-stone hover:text-charcoal hover:bg-mist transition-all cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center mx-auto mb-5">
+              <Download size={28} className="text-gold" />
+            </div>
+
+            <h3 className="font-serif text-xl font-semibold text-charcoal mb-2">{t.scanToSave}</h3>
+            <p className="text-sm text-stone/60 mb-6 leading-relaxed">{t.scanToSaveDesc}</p>
+
+            {/* Hidden canvas for QR generation */}
+            <div ref={canvasRef} style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+              <QRCodeCanvas
+                value={VCARD_STRING}
+                size={400}
+                level="M"
+                bgColor="#FFFFFF"
+                fgColor="#000000"
+                marginSize={2}
+              />
+            </div>
+
+            {/* Visible <img> — WeChat can long-press to scan */}
+            <div className="bg-white rounded-2xl p-5 border border-mist/60 inline-block">
+              {qrDataUrl ? (
+                <img
+                  src={qrDataUrl}
+                  alt="vCard QR Code"
+                  width={200}
+                  height={200}
+                  className="block"
+                />
+              ) : (
+                <div className="w-[200px] h-[200px] flex items-center justify-center text-stone/40 text-sm">Loading...</div>
+              )}
+            </div>
+
+            <button
+              onClick={onClose}
+              className="mt-6 px-8 py-2.5 bg-charcoal text-cream text-sm font-medium rounded-full hover:bg-charcoal-light transition-all cursor-pointer block mx-auto"
             >
               {t.close}
             </button>
