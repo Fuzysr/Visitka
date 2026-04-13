@@ -30,6 +30,10 @@ const translations = {
     email: 'Email',
     address: 'Address',
     addressValue: 'Minsk, Belarus',
+    registeredAddress: 'Registered Address',
+    registeredAddressValue: 'Belarus, 223411, Minsk region, Uzda, Svobody square, 5',
+    postalAddress: 'Postal Address',
+    postalAddressValue: 'Belarus, 223411, Minsk region, Uzda, str. Pervomaiskaya, 65',
     whatsapp: 'WhatsApp',
     telegram: 'Telegram',
     wechat: 'WeChat',
@@ -70,6 +74,10 @@ const translations = {
     email: 'Эл. почта',
     address: 'Адрес',
     addressValue: 'Минск, Беларусь',
+    registeredAddress: 'Юридический адрес',
+    registeredAddressValue: 'Belarus, 223411, Minsk region, Uzda, Svobody square, 5',
+    postalAddress: 'Почтовый адрес',
+    postalAddressValue: 'Belarus, 223411, Minsk region, Uzda, str. Pervomaiskaya, 65',
     whatsapp: 'WhatsApp',
     telegram: 'Telegram',
     wechat: 'WeChat',
@@ -110,6 +118,10 @@ const translations = {
     email: '邮箱',
     address: '地址',
     addressValue: '白俄罗斯，明斯克',
+    registeredAddress: '注册地址',
+    registeredAddressValue: 'Belarus, 223411, Minsk region, Uzda, Svobody square, 5',
+    postalAddress: '邮寄地址',
+    postalAddressValue: 'Belarus, 223411, Minsk region, Uzda, str. Pervomaiskaya, 65',
     whatsapp: 'WhatsApp',
     telegram: 'Telegram',
     wechat: '微信',
@@ -140,6 +152,8 @@ const CONTACT = {
   company: 'Decorative Candles Production',
   whatsapp: '375296622515',
   telegram: '@Roman18vek',
+  registeredAddress: 'Minsk, Belarus',
+  postalAddress: 'Minsk, Belarus',
 }
 
 /* ─────────────────────── vCard Download ──────────────────── */
@@ -257,7 +271,7 @@ function App() {
       <TopControls lang={lang} setLang={setLang} langOpen={langOpen} setLangOpen={setLangOpen} t={t} dark={dark} setDark={setDark} />
 
       {/* ─── Hero ─── */}
-      <HeroSection t={t} onSave={handleSaveContact} />
+      <HeroSection t={t} onSave={handleSaveContact} dark={dark} />
 
       {/* ─── Decorative Divider ─── */}
       <Divider />
@@ -365,7 +379,7 @@ function TopControls({ lang, setLang, langOpen, setLangOpen, t, dark, setDark })
 }
 
 /* ═══════════════════════ HERO ═════════════════════════════── */
-function HeroSection({ t, onSave }) {
+function HeroSection({ t, onSave, dark }) {
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center px-6 py-20 text-center overflow-hidden">
       {/* Background Glow */}
@@ -388,8 +402,12 @@ function HeroSection({ t, onSave }) {
           <div className="particle" />
           <div className="particle" />
           <div className="particle" />
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gold/20 to-gold-light/10 flex items-center justify-center border border-gold/20 shadow-[0_0_30px_rgba(184,134,11,0.15)]">
-            <Flame size={32} className="text-gold drop-shadow-[0_0_8px_rgba(184,134,11,0.4)]" />
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gold/20 to-gold-light/10 flex items-center justify-center border border-gold/20 shadow-[0_0_30px_rgba(184,134,11,0.15)] overflow-hidden">
+            <img
+              src="/logo.svg"
+              alt="CW"
+              className={`w-12 h-12 object-contain${dark ? ' invert' : ''}`}
+            />
           </div>
         </div>
       </motion.div>
@@ -631,6 +649,30 @@ function ContactSection({ t, copiedField, copyToClipboard, wechatOpen, setWechat
             <div className="flex-1">
               <p className="text-xs uppercase tracking-widest text-stone/50 font-medium">{t.address}</p>
               <p className="text-charcoal font-medium text-base">{t.addressValue}</p>
+            </div>
+          </motion.div>
+
+          <motion.div variants={fadeUp} custom={3}
+            className="flex items-center gap-4 bg-card/60 backdrop-blur-sm border border-mist/60 rounded-2xl p-5 hover:shadow-md transition-all duration-300"
+          >
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-gold/10 to-gold-light/5 flex items-center justify-center shrink-0">
+              <MapPin size={18} className="text-gold" />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs uppercase tracking-widest text-stone/50 font-medium">{t.registeredAddress}</p>
+              <p className="text-charcoal font-medium text-base">{t.registeredAddressValue}</p>
+            </div>
+          </motion.div>
+
+          <motion.div variants={fadeUp} custom={4}
+            className="flex items-center gap-4 bg-card/60 backdrop-blur-sm border border-mist/60 rounded-2xl p-5 hover:shadow-md transition-all duration-300"
+          >
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-gold/10 to-gold-light/5 flex items-center justify-center shrink-0">
+              <MapPin size={18} className="text-gold" />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs uppercase tracking-widest text-stone/50 font-medium">{t.postalAddress}</p>
+              <p className="text-charcoal font-medium text-base">{t.postalAddressValue}</p>
             </div>
           </motion.div>
         </motion.div>
